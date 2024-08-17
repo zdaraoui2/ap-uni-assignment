@@ -4,7 +4,7 @@ class GameComponent
 {
 public:
     GameComponent();
-    virtual void Update(const tm *eventTime); // Virtual to enable class to be overriden for polymorphism
+    virtual void Update(const tm *eventTime); // Virtual to enable class to be overriden for polymorphism.
 
 private:
     int id;
