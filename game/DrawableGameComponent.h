@@ -1,3 +1,6 @@
+#ifndef DRAWABLE_GAME_COMPONENT_H
+#define DRAWABLE_GAME_COMPONENT_H
+
 #include "GameComponent.h"
 
 class DrawableGameComponent : public GameComponent
@@ -25,3 +28,5 @@ private:
     Direction direction;
     int x, y;
 };
+
+#endif // DRAWABLE_GAME_COMPONENT_H

@@ -2,7 +2,7 @@
 #include "DrawableGameComponent.h"
 #include <iostream>
 
-// Standalone function to initialize the game
+// Standalone function to initialise the game
 void Init()
 {
     std::cout << "Initialising game" << std::endl;
