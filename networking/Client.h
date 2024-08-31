@@ -6,7 +6,7 @@
 class Client : public Comms
 {
 public:
-    void connect_to_server(const char *ip_address, int port);
+    void connect_to_server();
     void run();
 };
 

@@ -6,7 +6,7 @@
 class Server : public Comms
 {
 public:
-    void bind_socket(int port);
+    void bind_socket();
     void listen_for_connections();
     int accept_connection();
     void handle_client(int client_socket);
