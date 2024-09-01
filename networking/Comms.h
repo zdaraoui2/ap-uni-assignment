@@ -1,15 +1,21 @@
 #ifndef COMMS_H
 #define COMMS_H
 
-#include <iostream>
-#include <cstring>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <stdexcept>
+#include <exception>
+#include <string>
 
-class Comms
-{
+class CommsException : public std::exception {
+public:
+    explicit CommsException(const std::string& message) : msg_(message) {}
+    virtual const char* what() const noexcept override {
+        return msg_.c_str();
+    }
+
+private:
+    std::string msg_;
+};
+
+class Comms {
 protected:
     int sock;
 
