@@ -7,6 +7,10 @@
 #include <unistd.h>
 
 void Server::bind_socket(int port) {
+    if (!is_valid_port(port)) {
+        throw CommsException("Invalid port number: " + std::to_string(port));
+    }
+
     try {
         struct sockaddr_in address;
         int opt = 1;

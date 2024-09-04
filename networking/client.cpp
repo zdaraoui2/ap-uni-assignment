@@ -7,6 +7,14 @@
 #include <unistd.h>
 
 void Client::connect_to_server(const std::string& ip_address, int port) {
+    if (!is_valid_ip(ip_address)) {
+        throw CommsException("Invalid IP address format: " + ip_address);
+    }
+
+    if (!is_valid_port(port)) {
+        throw CommsException("Invalid port number: " + std::to_string(port));
+    }
+
     try {
         struct sockaddr_in serv_addr;
         memset(&serv_addr, 0, sizeof(serv_addr));

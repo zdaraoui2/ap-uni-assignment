@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <stdexcept>
+#include <regex>
 
 class CommsException : public std::runtime_error {
 public:
@@ -15,7 +16,7 @@ public:
 
 class Comms {
 protected:
-    int sock; 
+    int sock;
 
 public:
     Comms();
@@ -24,6 +25,10 @@ public:
     int send_message(const std::string &message);
     int receive_message(char *buffer, int buffer_size);
     virtual ~Comms();
+
+    // Utility methods for validation
+    bool is_valid_ip(const std::string& ip);
+    bool is_valid_port(int port);
 };
 
 #endif // COMMS_H

@@ -1,4 +1,5 @@
 #include "Comms.h"
+#include <regex>
 
 Comms::Comms() : sock(-1) {}
 
@@ -31,10 +32,21 @@ int Comms::receive_message(char *buffer, int buffer_size) {
     if (valread < 0) {
         throw CommsException("Receive message failed: " + std::string(strerror(errno)));
     }
-    buffer[valread] = '\0';
+    buffer[valread] = '\0';  // Null-terminate the received message
     return valread;
 }
 
 Comms::~Comms() {
     close_socket();
+}
+
+// IP validation
+bool Comms::is_valid_ip(const std::string& ip) {
+    std::regex ip_regex("^(\\d{1,3}\\.){3}\\d{1,3}$");
+    return std::regex_match(ip, ip_regex);
+}
+
+// Port validation
+bool Comms::is_valid_port(int port) {
+    return port > 0 && port <= 65535;
 }
