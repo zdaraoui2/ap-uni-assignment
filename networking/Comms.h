@@ -1,18 +1,23 @@
 #ifndef COMMS_H
 #define COMMS_H
 
-#include <exception>
-#include <string>
+#include <iostream>
+#include <cstring>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <stdexcept>
+#include <regex>
 
-class CommsException : public std::exception {
+#ifdef DEBUG
+    #define DEBUG_PRINT(x) std::cout << "[DEBUG] " << x << std::endl
+#else
+    #define DEBUG_PRINT(x)
+#endif
+
+class CommsException : public std::runtime_error {
 public:
-    explicit CommsException(const std::string& message) : msg_(message) {}
-    virtual const char* what() const noexcept override {
-        return msg_.c_str();
-    }
-
-private:
-    std::string msg_;
+    explicit CommsException(const std::string& message) : std::runtime_error(message) {}
 };
 
 class Comms {
@@ -26,6 +31,10 @@ public:
     int send_message(const std::string &message);
     int receive_message(char *buffer, int buffer_size);
     virtual ~Comms();
+
+    // Utility methods for validation
+    bool is_valid_ip(const std::string& ip);
+    bool is_valid_port(int port);
 };
 
 #endif // COMMS_H
