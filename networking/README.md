@@ -77,3 +77,36 @@ To run the client, use the following command. The client connects to the specifi
 ```bash
 ./client 127.0.0.1 8080
 ```
+
+## Debug Mode
+
+This project includes optional debug prints that can help you understand the internal processes of the client-server communication, such as socket creation, connection status, timeouts, and message exchanges. To enable debug messages, you can compile both the client and server with the `-DDEBUG` flag.
+
+### **Compile the Client in Debug Mode**
+
+To compile the client with debug information:
+
+```bash
+c++ main.cpp Client.cpp Comms.cpp -std=c++11 -o client -DDEBUG
+```
+
+This will include additional debug prints in the output, such as:
+
+- Socket creation
+- Timeout settings
+- TCP keep-alive settings
+- Sent and received messages
+
+### **Compile the Server in Debug Mode**
+
+To compile the server with debug information:
+
+```bash
+c++ main.cpp Server.cpp Comms.cpp -std=c++11 -DCOMPILE_AS_SERVER -o server -DDEBUG
+```
+
+This will include debug messages showing:
+
+- Client connection and disconnection events
+- TCP keep-alive settings for each client
+- Sent and received messages for each client

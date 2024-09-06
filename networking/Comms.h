@@ -9,6 +9,12 @@
 #include <stdexcept>
 #include <regex>
 
+#ifdef DEBUG
+    #define DEBUG_PRINT(x) std::cout << "[DEBUG] " << x << std::endl
+#else
+    #define DEBUG_PRINT(x)
+#endif
+
 class CommsException : public std::runtime_error {
 public:
     explicit CommsException(const std::string& message) : std::runtime_error(message) {}
