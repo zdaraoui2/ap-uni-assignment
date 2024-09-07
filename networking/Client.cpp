@@ -67,12 +67,15 @@ void Client::run() {
                 int valread = receive_message(buffer, sizeof(buffer));
 
                 if (valread > 0) {
-                    // Move cursor to the beginning of the line, print the message, and then reprint the prompt
-                    std::cout << "\rServer: " << buffer << std::endl;
-                    DEBUG_PRINT("Received message from server: " + std::string(buffer));
+                    // Clear the line where the input prompt was to avoid overlap
+                    std::cout << "\r\033[K";  // Clear current line in the terminal
+
+                    // Print the server message
+                    std::cout << "Server: " << buffer << std::endl;
+                    
                     // Reprint the input prompt for the user
                     std::cout << "Enter message: ";
-                    std::cout.flush();
+                    std::cout.flush();  // Ensure the prompt is displayed
                 } else if (valread == 0) {
                     // If the server has closed the connection
                     std::cout << "Server closed the connection." << std::endl;
@@ -97,7 +100,6 @@ void Client::run() {
         std::getline(std::cin, message);  // Get user input
 
         send_message(message);  // Send the message to the server
-        DEBUG_PRINT("Message sent: " + message);
 
         // If user types "QUIT", exit the loop
         if (message == "QUIT") {

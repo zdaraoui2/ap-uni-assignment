@@ -96,8 +96,13 @@ void Server::handle_client(int client_socket) {
         }
 
         buffer[valread] = '\0';  // Null-terminate the received message
-        std::cout << client_id << ": " << buffer << std::endl;
-        DEBUG_PRINT("Received message from " + client_id + ": " + std::string(buffer));
+
+        // Clear the current input line before printing the received message
+        std::cout << "\r\033[K";  // Clears the current line in the terminal
+        std::cout << client_id << ": " << buffer << std::endl;  // Print the received message
+
+        // Re-display the input prompt after printing the message
+        std::cout << "Enter message to send (or specify client_id:message): " << std::flush;
 
         if (strcmp(buffer, "QUIT") == 0) break;  // Handle "QUIT" command
     }
@@ -106,6 +111,8 @@ void Server::handle_client(int client_socket) {
     client_ids.erase(client_socket);  // Remove client ID on disconnect
     DEBUG_PRINT("Client socket closed for " + client_id);
 }
+
+
 
 // Server main loop for managing connections and sending messages
 void Server::run(int port) {
