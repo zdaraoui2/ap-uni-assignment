@@ -35,3 +35,11 @@ main.dSYM
 .DS_Store
 
 .vscode/
+
+extract_code.sh
+game.pdf
+networking.pdf
+networking-demo.mov
+networking-code.mov
+game-demo.mov
+ap-uni-assignment.mov
