@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <thread>
 
 void Client::connect_to_server(const std::string& ip_address, int port) {
     // Check if the IP address and port number are valid before trying to connect
@@ -33,20 +34,6 @@ void Client::connect_to_server(const std::string& ip_address, int port) {
         create_socket();  // Create the client's socket
         DEBUG_PRINT("Socket created.");
 
-        // Set a 5-second timeout for sending and receiving data
-        struct timeval timeout;
-        timeout.tv_sec = 5;  
-        timeout.tv_usec = 0; 
-
-        if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
-            throw CommsException("Failed to set receive timeout: " + std::string(strerror(errno)));
-        }
-
-        if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) < 0) {
-            throw CommsException("Failed to set send timeout: " + std::string(strerror(errno)));
-        }
-
-        DEBUG_PRINT("Timeouts set");
 
         // Enable TCP keep-alive to check if the server is still there
         int enable_keepalive = 1;
@@ -71,41 +58,61 @@ void Client::connect_to_server(const std::string& ip_address, int port) {
 }
 
 void Client::run() {
-    try {
-        std::string message;
-        while (true) {
-            DEBUG_PRINT("Waiting for user input...");
-            std::cout << "Enter message: ";
-            std::getline(std::cin, message);  // Read user input
+    // Create a thread to handle receiving messages from the server
+    std::thread receive_thread([this]() {
+        try {
+            char buffer[1024] = {0};
+            while (true) {
+                // Receive messages from the server
+                int valread = receive_message(buffer, sizeof(buffer));
 
-            send_message(message);  // Send the message to the server
-            DEBUG_PRINT("Message sent: " + message);
+                if (valread > 0) {
+                    // Clear the line where the input prompt was to avoid overlap
+                    std::cout << "\r\033[K";  // Clear current line in the terminal
 
-            if (message == "QUIT") {
-                DEBUG_PRINT("Client is exiting...");
-                break;  // Exit the loop if the user wants to quit
+                    // Print the server message
+                    std::cout << "Server: " << buffer << std::endl;
+                    
+                    // Reprint the input prompt for the user
+                    std::cout << "Enter message: ";
+                    std::cout.flush();  // Ensure the prompt is displayed
+                } else if (valread == 0) {
+                    // If the server has closed the connection
+                    std::cout << "Server closed the connection." << std::endl;
+                    DEBUG_PRINT("Server closed connection, client is exiting.");
+                    break;
+                } else {
+                    // Handle receive error
+                    std::cerr << "Receive message failed: " << strerror(errno) << std::endl;
+                    DEBUG_PRINT("Receive error.");
+                    break;
+                }
             }
-
-            char buffer[1024] = {0};  // Buffer to hold the server's response
-            int valread = receive_message(buffer, sizeof(buffer));  // Receive the server's message
-
-            if (valread > 0) {
-                std::cout << "Server: " << buffer << std::endl;
-                DEBUG_PRINT("Received message from server: " + std::string(buffer));
-            } else if (valread == 0) {
-                std::cout << "Server closed the connection." << std::endl;
-                DEBUG_PRINT("Server closed connection, client is exiting.");
-                break;  // Exit if the server closes the connection
-            } else {
-                std::cerr << "Failed to receive message from server. Exiting..." << std::endl;
-                DEBUG_PRINT("Receive error.");
-                break;  // Exit on receive error
-            }
+        } catch (const CommsException& e) {
+            std::cerr << e.what() << std::endl;
         }
-    } catch (const CommsException& e) {
-        std::cerr << e.what() << std::endl;
+    });
+
+    // Main thread handles user input
+    std::string message;
+    while (true) {
+        std::cout << "Enter message: ";
+        std::getline(std::cin, message);  // Get user input
+
+        send_message(message);  // Send the message to the server
+
+        // If user types "QUIT", exit the loop
+        if (message == "QUIT") {
+            DEBUG_PRINT("Client is exiting...");
+            break;
+        }
     }
 
-    close_socket();  // Close the socket when done
+    // Join the receive thread to make sure it finishes properly
+    if (receive_thread.joinable()) {
+        receive_thread.join();
+    }
+    
+    close_socket();  // Close the socket after everything is done
     DEBUG_PRINT("Socket closed.");
 }
